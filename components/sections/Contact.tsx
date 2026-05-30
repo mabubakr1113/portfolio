@@ -29,15 +29,15 @@ export default function Contact() {
       <div className="grid grid-cols-12 gap-x-4 gap-y-16">
         <div className="col-span-12 md:col-span-8">
           <p
-            className="font-display text-ink leading-[0.95] text-pretty"
-            style={{ fontSize: "clamp(2.5rem, 7vw, 6rem)" }}
+            className="font-display text-ink leading-[1.05] break-words"
+            style={{ fontSize: "clamp(1.75rem, 3.5vw, 3.25rem)" }}
           >
             <a
               href={`mailto:${PERSONAL.email}`}
-              className="inline relative group"
+              className="inline relative group break-all"
             >
               {PERSONAL.email}
-              <span className="absolute left-0 right-0 -bottom-1 h-[3px] bg-accent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              <span className="absolute left-0 right-0 -bottom-1 h-[2px] bg-accent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </a>
             <span className="text-accent">.</span>
           </p>
