@@ -12,49 +12,71 @@ const INK_2 = "#2A2A26";
 const MUTED = "#6C6A60";
 const ACCENT = "#FF4D14";
 
-// Fetch a single Fraunces variable weight from Google Fonts for the headline.
-async function getFraunces() {
-  const cssRes = await fetch(
-    "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&display=swap",
-    { headers: { "User-Agent": "Mozilla/5.0" } }
-  );
-  const css = await cssRes.text();
-  const url = css.match(/src:\s*url\(([^)]+)\)\s*format\('woff2'\)/)?.[1];
-  if (!url) throw new Error("Fraunces font URL not found");
-  const fontRes = await fetch(url);
-  return fontRes.arrayBuffer();
-}
+// More permissive: handles single/double quotes and missing 'format()' on some variants.
+const FONT_URL_RE = /url\(([^)]+\.woff2[^)]*)\)/;
 
-async function getFrauncesItalic() {
-  const cssRes = await fetch(
-    "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300&display=swap",
-    { headers: { "User-Agent": "Mozilla/5.0" } }
-  );
-  const css = await cssRes.text();
-  const url = css.match(/src:\s*url\(([^)]+)\)\s*format\('woff2'\)/)?.[1];
-  if (!url) throw new Error("Fraunces italic font URL not found");
-  const fontRes = await fetch(url);
-  return fontRes.arrayBuffer();
-}
-
-async function getMono() {
-  const cssRes = await fetch(
-    "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap",
-    { headers: { "User-Agent": "Mozilla/5.0" } }
-  );
-  const css = await cssRes.text();
-  const url = css.match(/src:\s*url\(([^)]+)\)\s*format\('woff2'\)/)?.[1];
-  if (!url) throw new Error("JetBrains Mono font URL not found");
-  const fontRes = await fetch(url);
-  return fontRes.arrayBuffer();
+async function fetchFontBuffer(cssUrl: string): Promise<ArrayBuffer | null> {
+  try {
+    const cssRes = await fetch(cssUrl, {
+      headers: {
+        // Trick Google Fonts into serving woff2 by pretending to be modern Chrome.
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    });
+    if (!cssRes.ok) return null;
+    const css = await cssRes.text();
+    const match = css.match(FONT_URL_RE);
+    if (!match) return null;
+    const url = match[1].replace(/^['"]|['"]$/g, "");
+    const fontRes = await fetch(url);
+    if (!fontRes.ok) return null;
+    return await fontRes.arrayBuffer();
+  } catch {
+    return null;
+  }
 }
 
 export default async function Image() {
-  const [fraunces, frauncesItalic, mono] = await Promise.all([
-    getFraunces(),
-    getFrauncesItalic(),
-    getMono(),
+  // Load custom fonts in parallel; if any fail, the image still renders with fallback fonts.
+  const [serif, serifItalic, mono] = await Promise.all([
+    fetchFontBuffer(
+      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&display=swap"
+    ),
+    fetchFontBuffer(
+      "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300&display=swap"
+    ),
+    fetchFontBuffer(
+      "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap"
+    ),
   ]);
+
+  const fonts = [
+    serif && {
+      name: "Editorial",
+      data: serif,
+      weight: 900 as const,
+      style: "normal" as const,
+    },
+    serifItalic && {
+      name: "EditorialItalic",
+      data: serifItalic,
+      weight: 300 as const,
+      style: "italic" as const,
+    },
+    mono && {
+      name: "Mono",
+      data: mono,
+      weight: 500 as const,
+      style: "normal" as const,
+    },
+  ].filter((x): x is NonNullable<typeof x> => x !== null);
+
+  const SERIF = serif ? "Editorial" : "Georgia, 'Times New Roman', serif";
+  const ITALIC = serifItalic
+    ? "EditorialItalic"
+    : "Georgia, 'Times New Roman', serif";
+  const MONO = mono ? "Mono" : "ui-monospace, 'Courier New', monospace";
 
   return new ImageResponse(
     (
@@ -68,16 +90,16 @@ export default async function Image() {
           padding: "56px 64px",
           position: "relative",
           color: INK,
-          fontFamily: "Fraunces",
+          fontFamily: SERIF,
         }}
       >
-        {/* top meta strip */}
+        {/* meta strip */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            fontFamily: "JetBrains Mono",
+            fontFamily: MONO,
             fontSize: 18,
             letterSpacing: 3,
             textTransform: "uppercase",
@@ -91,23 +113,22 @@ export default async function Image() {
                 height: 10,
                 borderRadius: 9999,
                 backgroundColor: ACCENT,
+                display: "flex",
               }}
             />
             <span>Live · Turku, FI</span>
           </div>
-          <div style={{ display: "flex", color: MUTED }}>
-            mabubakr.dev
-          </div>
+          <div style={{ display: "flex", color: MUTED }}>mabubakr.dev</div>
         </div>
 
         {/* hairline */}
         <div
           style={{
-            display: "flex",
             height: 1,
             width: "100%",
             backgroundColor: "#D2CBB7",
             marginTop: 24,
+            display: "flex",
           }}
         />
 
@@ -129,16 +150,17 @@ export default async function Image() {
               style={{
                 fontStyle: "italic",
                 fontWeight: 300,
-                fontFamily: "FrauncesItalic",
+                fontFamily: ITALIC,
+                display: "flex",
               }}
             >
               Abubakr
             </span>
-            <span style={{ color: ACCENT }}>.</span>
+            <span style={{ color: ACCENT, display: "flex" }}>.</span>
           </div>
         </div>
 
-        {/* bottom row: role + stats */}
+        {/* role + stats */}
         <div
           style={{
             display: "flex",
@@ -150,14 +172,15 @@ export default async function Image() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div
               style={{
-                fontFamily: "JetBrains Mono",
+                fontFamily: MONO,
                 fontSize: 18,
                 letterSpacing: 3,
                 textTransform: "uppercase",
                 color: MUTED,
+                display: "flex",
               }}
             >
-              Vol. V — The Engineer&rsquo;s Journal
+              Vol. V — The Engineer's Journal
             </div>
             <div
               style={{
@@ -167,13 +190,14 @@ export default async function Image() {
                 lineHeight: 1.05,
               }}
             >
-              Senior Full-Stack Engineer ·{" "}
+              <span style={{ display: "flex" }}>Senior Full-Stack Engineer ·</span>
               <span
                 style={{
                   fontStyle: "italic",
                   fontWeight: 300,
-                  fontFamily: "FrauncesItalic",
+                  fontFamily: ITALIC,
                   marginLeft: 12,
+                  display: "flex",
                 }}
               >
                 React / Next / Node / AWS
@@ -181,7 +205,6 @@ export default async function Image() {
             </div>
           </div>
 
-          {/* stat strip */}
           <div
             style={{
               display: "flex",
@@ -192,11 +215,12 @@ export default async function Image() {
           >
             <div
               style={{
-                fontFamily: "JetBrains Mono",
+                fontFamily: MONO,
                 fontSize: 16,
                 letterSpacing: 3,
                 textTransform: "uppercase",
                 color: MUTED,
+                display: "flex",
               }}
             >
               Fig. 01 — The Numbers
@@ -211,28 +235,30 @@ export default async function Image() {
               }}
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span>5+</span>
+                <span style={{ display: "flex" }}>5+</span>
                 <span
                   style={{
-                    fontFamily: "JetBrains Mono",
+                    fontFamily: MONO,
                     fontSize: 14,
                     letterSpacing: 2,
                     textTransform: "uppercase",
                     color: MUTED,
+                    display: "flex",
                   }}
                 >
                   Years
                 </span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span>100K+</span>
+                <span style={{ display: "flex" }}>100K+</span>
                 <span
                   style={{
-                    fontFamily: "JetBrains Mono",
+                    fontFamily: MONO,
                     fontSize: 14,
                     letterSpacing: 2,
                     textTransform: "uppercase",
                     color: MUTED,
+                    display: "flex",
                   }}
                 >
                   Daily Users
@@ -246,14 +272,15 @@ export default async function Image() {
                   color: ACCENT,
                 }}
               >
-                <span>$500K+</span>
+                <span style={{ display: "flex" }}>$500K+</span>
                 <span
                   style={{
-                    fontFamily: "JetBrains Mono",
+                    fontFamily: MONO,
                     fontSize: 14,
                     letterSpacing: 2,
                     textTransform: "uppercase",
                     color: MUTED,
+                    display: "flex",
                   }}
                 >
                   Revenue
@@ -314,13 +341,6 @@ export default async function Image() {
         />
       </div>
     ),
-    {
-      ...size,
-      fonts: [
-        { name: "Fraunces", data: fraunces, weight: 900, style: "normal" },
-        { name: "FrauncesItalic", data: frauncesItalic, weight: 300, style: "italic" },
-        { name: "JetBrains Mono", data: mono, weight: 500, style: "normal" },
-      ],
-    }
+    { ...size, fonts }
   );
 }
