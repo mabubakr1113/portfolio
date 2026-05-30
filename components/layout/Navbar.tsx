@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import { track } from "@vercel/analytics";
 import { NAV_LINKS, PERSONAL } from "@/constants";
-
-function trackCv(source: "navbar-desktop" | "navbar-mobile") {
-  track("cv_download", { source });
-}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -64,7 +59,6 @@ export default function Navbar() {
           <a
             href="/cv.pdf"
             download="Abubakr_Resume.pdf"
-            onClick={() => trackCv("navbar-desktop")}
             className="font-mono text-xs uppercase tracking-[0.18em] text-ink bg-paper border border-ink px-3 py-2 hover:bg-ink hover:text-paper transition-colors"
           >
             Resume ↓
@@ -98,10 +92,7 @@ export default function Navbar() {
               <a
                 href="/cv.pdf"
                 download="Abubakr_Resume.pdf"
-                onClick={() => {
-                  trackCv("navbar-mobile");
-                  setMenuOpen(false);
-                }}
+                onClick={() => setMenuOpen(false)}
                 className="inline-flex items-center gap-2 font-mono text-sm uppercase tracking-[0.18em] text-ink bg-paper border border-ink px-3 py-2"
               >
                 Resume ↓
