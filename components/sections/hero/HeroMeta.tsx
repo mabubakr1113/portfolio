@@ -1,4 +1,5 @@
 import Clock from "@/components/sections/hero/Clock";
+import VisitorCounter from "@/components/sections/hero/VisitorCounter";
 
 export default function HeroMeta() {
   return (
@@ -12,7 +13,7 @@ export default function HeroMeta() {
         <span>E 22.2666°</span>
       </div>
       <div className="hidden md:block col-span-3 text-center">
-        Vol. V — Issue 26
+        <VisitorCounter />
       </div>
       <div className="col-span-12 sm:col-span-6 md:col-span-3 text-center sm:text-right">
         Established <span className="text-accent">2019</span> · Turku, FI
