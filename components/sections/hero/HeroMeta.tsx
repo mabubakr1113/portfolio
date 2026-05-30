@@ -12,7 +12,7 @@ export default function HeroMeta() {
         <span>N 60.4518°</span>
         <span>E 22.2666°</span>
       </div>
-      <div className="hidden md:block col-span-3 text-center">
+      <div className="col-span-12 md:col-span-3 text-center">
         <VisitorCounter />
       </div>
       <div className="col-span-12 sm:col-span-6 md:col-span-3 text-center sm:text-right">
