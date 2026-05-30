@@ -8,10 +8,62 @@ export const contentType = "image/png";
 
 const PAPER = "#ECE6D4";
 const INK = "#0E0E0C";
+const INK_2 = "#2A2A26";
 const MUTED = "#6C6A60";
 const ACCENT = "#FF4D14";
 
-export default function Image() {
+// jsdelivr mirrors @fontsource — far more reliable from edge runtime than fonts.googleapis.com
+const FONT_URLS = {
+  serifBlack:
+    "https://cdn.jsdelivr.net/npm/@fontsource/fraunces@5/files/fraunces-latin-900-normal.woff",
+  serifItalic:
+    "https://cdn.jsdelivr.net/npm/@fontsource/fraunces@5/files/fraunces-latin-300-italic.woff",
+  mono:
+    "https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5/files/jetbrains-mono-latin-500-normal.woff",
+};
+
+async function tryFetchFont(url: string): Promise<ArrayBuffer | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return await res.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
+export default async function Image() {
+  const [serifBlack, serifItalic, mono] = await Promise.all([
+    tryFetchFont(FONT_URLS.serifBlack),
+    tryFetchFont(FONT_URLS.serifItalic),
+    tryFetchFont(FONT_URLS.mono),
+  ]);
+
+  const fonts = [
+    serifBlack && {
+      name: "Serif",
+      data: serifBlack,
+      weight: 900 as const,
+      style: "normal" as const,
+    },
+    serifItalic && {
+      name: "SerifItalic",
+      data: serifItalic,
+      weight: 300 as const,
+      style: "italic" as const,
+    },
+    mono && {
+      name: "Mono",
+      data: mono,
+      weight: 500 as const,
+      style: "normal" as const,
+    },
+  ].filter((x): x is NonNullable<typeof x> => x !== null);
+
+  const SERIF = serifBlack ? "Serif" : "Georgia, serif";
+  const ITALIC = serifItalic ? "SerifItalic" : "Georgia, serif";
+  const MONO = mono ? "Mono" : "ui-monospace, monospace";
+
   return new ImageResponse(
     (
       <div
@@ -21,44 +73,44 @@ export default function Image() {
           display: "flex",
           flexDirection: "column",
           backgroundColor: PAPER,
-          padding: "64px 72px",
+          padding: "56px 64px",
           position: "relative",
           color: INK,
-          fontFamily: "Georgia, 'Times New Roman', serif",
+          fontFamily: SERIF,
         }}
       >
-        {/* top mono strip */}
+        {/* top meta strip */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            fontSize: 20,
+            fontSize: 18,
             letterSpacing: 4,
             textTransform: "uppercase",
-            color: MUTED,
-            fontFamily: "ui-monospace, 'Courier New', monospace",
+            color: INK_2,
+            fontFamily: MONO,
           }}
         >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 14,
+              gap: 12,
             }}
           >
             <div
               style={{
-                width: 12,
-                height: 12,
+                display: "flex",
+                width: 10,
+                height: 10,
                 borderRadius: 9999,
                 backgroundColor: ACCENT,
-                display: "flex",
               }}
             />
             <div style={{ display: "flex" }}>Live · Turku, FI</div>
           </div>
-          <div style={{ display: "flex" }}>mabubakr.dev</div>
+          <div style={{ display: "flex", color: MUTED }}>mabubakr.dev</div>
         </div>
 
         {/* hairline */}
@@ -68,20 +120,20 @@ export default function Image() {
             height: 1,
             width: "100%",
             backgroundColor: "#D2CBB7",
-            marginTop: 32,
+            marginTop: 22,
           }}
         />
 
-        {/* HUGE NAME */}
+        {/* HUGE NAME — sized to fit within 1072px content width */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            marginTop: 60,
+            marginTop: 38,
             lineHeight: 0.88,
             fontWeight: 900,
-            fontSize: 210,
-            letterSpacing: -10,
+            fontSize: 150,
+            letterSpacing: -5,
           }}
         >
           <div style={{ display: "flex" }}>Mohammad</div>
@@ -89,8 +141,9 @@ export default function Image() {
             <div
               style={{
                 display: "flex",
+                fontFamily: ITALIC,
                 fontStyle: "italic",
-                fontWeight: 400,
+                fontWeight: 300,
               }}
             >
               Abubakr
@@ -99,32 +152,32 @@ export default function Image() {
           </div>
         </div>
 
-        {/* bottom: role + stats */}
+        {/* bottom: role on left, stats on right */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-end",
             marginTop: "auto",
-            gap: 32,
+            gap: 40,
           }}
         >
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 14,
-              maxWidth: 640,
+              gap: 8,
+              maxWidth: 580,
             }}
           >
             <div
               style={{
                 display: "flex",
-                fontSize: 20,
+                fontSize: 16,
                 letterSpacing: 4,
                 textTransform: "uppercase",
                 color: MUTED,
-                fontFamily: "ui-monospace, 'Courier New', monospace",
+                fontFamily: MONO,
               }}
             >
               The Engineer&rsquo;s Journal
@@ -132,9 +185,9 @@ export default function Image() {
             <div
               style={{
                 display: "flex",
-                fontSize: 40,
+                fontSize: 32,
                 color: INK,
-                lineHeight: 1.1,
+                lineHeight: 1.15,
               }}
             >
               Senior Full-Stack Engineer
@@ -142,13 +195,15 @@ export default function Image() {
             <div
               style={{
                 display: "flex",
-                fontSize: 28,
+                fontSize: 26,
+                fontFamily: ITALIC,
                 fontStyle: "italic",
-                color: MUTED,
-                lineHeight: 1.1,
+                fontWeight: 300,
+                color: INK_2,
+                lineHeight: 1.15,
               }}
             >
-              React / Next / Node / AWS
+              React · Next · Node · AWS
             </div>
           </div>
 
@@ -158,41 +213,48 @@ export default function Image() {
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-end",
-              gap: 12,
+              gap: 10,
             }}
           >
             <div
               style={{
                 display: "flex",
-                fontSize: 18,
+                fontSize: 16,
                 letterSpacing: 4,
                 textTransform: "uppercase",
                 color: MUTED,
-                fontFamily: "ui-monospace, 'Courier New', monospace",
+                fontFamily: MONO,
               }}
             >
               Fig. 01 — The Numbers
             </div>
-            <div style={{ display: "flex", gap: 36, color: INK }}>
+            <div style={{ display: "flex", gap: 32, color: INK }}>
               <div
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-start",
+                  alignItems: "flex-end",
                   gap: 4,
                 }}
               >
-                <div style={{ display: "flex", fontSize: 56, lineHeight: 1 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 48,
+                    lineHeight: 1,
+                    fontWeight: 900,
+                  }}
+                >
                   5+
                 </div>
                 <div
                   style={{
                     display: "flex",
-                    fontSize: 14,
+                    fontSize: 13,
                     letterSpacing: 2,
                     textTransform: "uppercase",
                     color: MUTED,
-                    fontFamily: "ui-monospace, 'Courier New', monospace",
+                    fontFamily: MONO,
                   }}
                 >
                   Years
@@ -202,21 +264,28 @@ export default function Image() {
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-start",
+                  alignItems: "flex-end",
                   gap: 4,
                 }}
               >
-                <div style={{ display: "flex", fontSize: 56, lineHeight: 1 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 48,
+                    lineHeight: 1,
+                    fontWeight: 900,
+                  }}
+                >
                   100K+
                 </div>
                 <div
                   style={{
                     display: "flex",
-                    fontSize: 14,
+                    fontSize: 13,
                     letterSpacing: 2,
                     textTransform: "uppercase",
                     color: MUTED,
-                    fontFamily: "ui-monospace, 'Courier New', monospace",
+                    fontFamily: MONO,
                   }}
                 >
                   Daily Users
@@ -226,22 +295,29 @@ export default function Image() {
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-start",
+                  alignItems: "flex-end",
                   gap: 4,
                   color: ACCENT,
                 }}
               >
-                <div style={{ display: "flex", fontSize: 56, lineHeight: 1 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 48,
+                    lineHeight: 1,
+                    fontWeight: 900,
+                  }}
+                >
                   $500K+
                 </div>
                 <div
                   style={{
                     display: "flex",
-                    fontSize: 14,
+                    fontSize: 13,
                     letterSpacing: 2,
                     textTransform: "uppercase",
                     color: MUTED,
-                    fontFamily: "ui-monospace, 'Courier New', monospace",
+                    fontFamily: MONO,
                   }}
                 >
                   Revenue
@@ -255,10 +331,10 @@ export default function Image() {
         <div
           style={{
             position: "absolute",
-            top: 32,
-            left: 32,
-            width: 18,
-            height: 18,
+            top: 28,
+            left: 28,
+            width: 16,
+            height: 16,
             borderLeft: `2px solid ${ACCENT}`,
             borderTop: `2px solid ${ACCENT}`,
             display: "flex",
@@ -267,10 +343,10 @@ export default function Image() {
         <div
           style={{
             position: "absolute",
-            top: 32,
-            right: 32,
-            width: 18,
-            height: 18,
+            top: 28,
+            right: 28,
+            width: 16,
+            height: 16,
             borderRight: `2px solid ${ACCENT}`,
             borderTop: `2px solid ${ACCENT}`,
             display: "flex",
@@ -279,10 +355,10 @@ export default function Image() {
         <div
           style={{
             position: "absolute",
-            bottom: 32,
-            left: 32,
-            width: 18,
-            height: 18,
+            bottom: 28,
+            left: 28,
+            width: 16,
+            height: 16,
             borderLeft: `2px solid ${ACCENT}`,
             borderBottom: `2px solid ${ACCENT}`,
             display: "flex",
@@ -291,10 +367,10 @@ export default function Image() {
         <div
           style={{
             position: "absolute",
-            bottom: 32,
-            right: 32,
-            width: 18,
-            height: 18,
+            bottom: 28,
+            right: 28,
+            width: 16,
+            height: 16,
             borderRight: `2px solid ${ACCENT}`,
             borderBottom: `2px solid ${ACCENT}`,
             display: "flex",
@@ -302,6 +378,6 @@ export default function Image() {
         />
       </div>
     ),
-    { ...size }
+    { ...size, fonts }
   );
 }
