@@ -1,8 +1,37 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import { HERO_STATS } from "@/constants";
+
+const HeroRobot = dynamic(
+  () => import("@/components/sections/hero/HeroRobot"),
+  { ssr: false, loading: () => null }
+);
 
 export default function HeroSidebar() {
   return (
     <aside className="col-span-12 md:col-span-4 md:col-start-9 flex flex-col gap-8 mt-8 md:mt-2 text-center md:text-left">
+      {/* Robot — modern AI agent, sits as the visual hook at the top of the sidebar */}
+      <div
+        className="rise relative frame-ink overflow-hidden"
+        style={{ animationDelay: "0.3s" }}
+      >
+        <HeroRobot />
+        {/* corner registration marks (matches the editorial portrait frame) */}
+        <span className="absolute top-2 left-2 w-3 h-3 border-l border-t border-accent" />
+        <span className="absolute top-2 right-2 w-3 h-3 border-r border-t border-accent" />
+        <span className="absolute bottom-2 left-2 w-3 h-3 border-l border-b border-accent" />
+        <span className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-accent" />
+        {/* mono caption strip */}
+        <div className="absolute left-3 bottom-3 right-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.22em] text-muted pointer-events-none">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            Online
+          </span>
+          <span>UNIT 01 / MA-AI</span>
+        </div>
+      </div>
+
       <div className="rise" style={{ animationDelay: "0.4s" }}>
         <div className="flex items-center justify-center md:justify-start gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-muted mb-3">
           <span className="w-6 h-px bg-muted" />
