@@ -1,0 +1,20 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0d2a1e"/>
+      <stop offset="100%" stop-color="#080c14"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+  <circle cx="100" cy="100" r="100" fill="url(#glow)"/>
+  <!-- Silhouette: head -->
+  <circle cx="100" cy="78" r="32" fill="#1a3a2a"/>
+  <!-- Silhouette: shoulders -->
+  <ellipse cx="100" cy="160" rx="52" ry="36" fill="#1a3a2a"/>
+  <!-- Initials overlay -->
+  <text x="100" y="88" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#10b981" opacity="0.9">MA</text>
+</svg>
