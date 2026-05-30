@@ -5,9 +5,17 @@ import { PERSONAL, PROJECTS } from "@/constants";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ProjectArticle from "@/components/sections/projects/ProjectArticle";
 
+const NUMBER_WORDS = [
+  "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
+  "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen",
+  "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty",
+];
+const inWords = (n: number) => NUMBER_WORDS[n] ?? String(n);
+
 export default function Projects() {
   const { ref, inView } = useInView({ threshold: 0.03, triggerOnce: true });
   const [featured, ...rest] = PROJECTS;
+  const count = inWords(PROJECTS.length);
 
   return (
     <section
@@ -22,7 +30,8 @@ export default function Projects() {
           kicker="Selected works"
           title={
             <>
-              Six builds. <span className="serif-italic font-light">Six receipts</span>.
+              {count} builds.{" "}
+              <span className="serif-italic font-light">{count} receipts</span>.
             </>
           }
           lede="A short anthology — the platforms, prototypes and one award winner that earned their keep."
